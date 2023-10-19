@@ -4,8 +4,8 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
-use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class EmployeeController extends Controller
 {
@@ -31,10 +31,22 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+        $req_data = $request->all();
+        $rules = [
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'phone_number' => 'required',
+        ];
+        $validator = Validator::make($req_data, $rules);
+        if ($validator->fails()) {
+            return response()->json(array('error' => true, 'validation_message' => $validator->errors()));
+        }
+
         $data = new Employee;
         $data->name = $request->name;
         $data->email = $request->email;
-        $data->phone_number = $request->contact_number;
+        $data->phone_number = $request->phone_number;
         $data->save();
         return response()->json(['error'=>false,'message'=>"Successfully saved"]);
     }
@@ -51,7 +63,6 @@ class EmployeeController extends Controller
      */
     public function edit(string $id)
     {
-
         $data = Employee::find($id);
         return response()->json(['key'=>$data]);
     }
@@ -59,9 +70,26 @@ class EmployeeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $req_data = $request->all();
+        $rules = [
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'phone_number' => 'required',
+        ];
+        $validator = Validator::make($req_data, $rules);
+        if ($validator->fails()) {
+            return response()->json(array('error' => true, 'validation_error' => true, 'validation_message' => $validator->errors()));
+        }
+        $data = Employee::find($id);
+        $data->name = $request['name'];
+        $data->email = $request['email'];
+        $data->phone_number = $request['phone_number'];
+        $data->password = $request['password'];
+        $data->save();
+        return response()->json('done');
     }
 
     /**
